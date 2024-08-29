@@ -155,7 +155,7 @@ export default class CanvasDraw extends PureComponent {
     }
     this.clearExceptErasedLines();
     this.simulateDrawingLines({ lines, immediate: true });
-    // this.triggerOnChange();
+    this.triggerOnChange();
   };
 
   eraseAll = () => {
@@ -575,7 +575,6 @@ export default class CanvasDraw extends PureComponent {
     // Yoyo
     if (triggerEmit && points.length % 10 === 0) {
       socket.emit("draw points", points, brushColor, brushRadius, getRoom());
-      console.log("draw points emitted");
     }
     this.ctx.temp.lineJoin = "round";
     this.ctx.temp.lineCap = "round";
@@ -609,12 +608,18 @@ export default class CanvasDraw extends PureComponent {
     if (triggerEmit) {
       socket.emit(
         "draw points",
-        this.points,
-        brushColor,
-        brushRadius,
+        [...this.points],
+        brushColor || this.props.brushColor,
+        brushRadius || this.props.brushRadius,
         getRoom()
       );
-      socket.emit("save line", this.points, brushColor, brushRadius, getRoom());
+      socket.emit(
+        "save line",
+        [...this.points],
+        brushColor || this.props.brushColor,
+        brushRadius || this.props.brushRadius,
+        getRoom()
+      );
     }
     // Yoyo
     if (points) {
