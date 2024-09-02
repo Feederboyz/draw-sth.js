@@ -122,6 +122,9 @@ export default class CanvasDraw extends PureComponent {
   }
 
   socketOn = () => {
+    socket.onAny((eventName, ...args) => {
+      console.log(eventName);
+    });
     socket.on("draw points", (points, brushColor, brushRadius) => {
       const triggerEmit = false;
       this.drawPoints({ points, brushColor, brushRadius }, triggerEmit);
@@ -133,12 +136,16 @@ export default class CanvasDraw extends PureComponent {
     socket.on("undo", () => {
       this.undo(false);
     });
+    socket.on("erase all", () => {
+      this.eraseAll(false);
+    });
   };
 
   socketOff = () => {
-    socket.off("undo");
     socket.off("draw points");
     socket.off("save line");
+    socket.off("undo");
+    socket.off("erase all");
   };
 
   undo = (triggerEmit = true) => {
@@ -158,7 +165,10 @@ export default class CanvasDraw extends PureComponent {
     this.triggerOnChange();
   };
 
-  eraseAll = () => {
+  eraseAll = (triggerEmit = true) => {
+    if (triggerEmit) {
+      socket.emit("erase all", getRoom());
+    }
     this.erasedLines.push([...this.lines]);
     this.clearExceptErasedLines();
     this.triggerOnChange();

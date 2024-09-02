@@ -58,6 +58,7 @@ export default function Chatroom() {
   return (
     <>
       <Canvas ref={canvasDrawRef} />
+      <h2>Room: {roomState}</h2>
       <br />
       <button onClick={handleLeaveRoom}>Leave room</button>
       <form onSubmit={handleEnterRoom}>

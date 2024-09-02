@@ -6,6 +6,7 @@ import { useRef, useState } from "react";
 export default forwardRef((props, ref) => {
   const canvasDrawRef = useRef(null);
   const [brushColor, setBrushColor] = useState("#444");
+  const [brushRadius, setBrushRadius] = useState(8);
 
   useImperativeHandle(ref, () => ({
     saveLine: ({ points, brushColor, brushRadius }, triggerEmit) => {
@@ -29,10 +30,17 @@ export default forwardRef((props, ref) => {
     socketOff: () => {
       canvasDrawRef.current.socketOff();
     },
+    eraseAll: () => {
+      canvasDrawRef.current.eraseAll();
+    },
   }));
 
   const handleUndo = (event) => {
     canvasDrawRef.current.undo();
+  };
+
+  const handleClear = (event) => {
+    canvasDrawRef.current.eraseAll();
   };
 
   const colorList = [
@@ -45,16 +53,35 @@ export default forwardRef((props, ref) => {
     { color: "#0ff", handler: () => setBrushColor("#0ff") },
   ];
 
+  const brushRadiusList = [4, 8, 12];
+  const handleBrushRadius = (event) => {
+    const brushRadius = event.target.value;
+    setBrushRadius(brushRadius);
+  };
+
   return (
     <>
       <CanvasDraw
         hideGrid={true}
         lazyRadius={2}
+        brushRadius={brushRadius}
         brushColor={brushColor}
         ref={canvasDrawRef}
       />
       <ColorPalette colorList={colorList} />
+      <br />
       <button onClick={handleUndo}>Undo</button>
+      <button onClick={handleClear}>Erase all</button>
+      <br />
+      {brushRadiusList.map((brushRadius) => (
+        <button
+          key={brushRadius}
+          onClick={handleBrushRadius}
+          value={brushRadius}
+        >
+          {brushRadius}px
+        </button>
+      ))}
     </>
   );
 });
