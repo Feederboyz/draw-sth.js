@@ -122,9 +122,6 @@ export default class CanvasDraw extends PureComponent {
   }
 
   socketOn = () => {
-    socket.onAny((eventName, ...args) => {
-      console.log(eventName);
-    });
     socket.on("draw points", (points, brushColor, brushRadius) => {
       const triggerEmit = false;
       this.drawPoints({ points, brushColor, brushRadius }, triggerEmit);

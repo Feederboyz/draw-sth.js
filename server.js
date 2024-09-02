@@ -29,7 +29,6 @@ app.prepare().then(() => {
     });
 
     socket.on("draw points", (points, brushColor, brushRadius, room) => {
-      console.log(`room ${room}`);
       socket.broadcast
         .to(room)
         .emit("draw points", points, brushColor, brushRadius);

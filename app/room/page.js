@@ -2,6 +2,7 @@
 import { useSearchParams } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import Canvas from "@/Canvas";
+import Chatroom from "@/Chatroom";
 import { setRoom, socket } from "@/socket";
 
 export default function Home() {
@@ -10,8 +11,7 @@ export default function Home() {
   const [roomState, setRoomState] = useState("");
 
   useEffect(() => {
-    const handleBeforeUnload = () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
+    const handleBeforeUnload = (event) => {
       socket.emit("leave room", (err, res) => {
         if (err) {
           console.error(err);
@@ -19,9 +19,10 @@ export default function Home() {
       });
       setRoom("");
       setRoomState("");
+      canvasRef.current && canvasRef.current.socketOff();
     };
 
-    let isUnmounted = false;
+    let isMounted = true;
     if (canvasRef.current) {
       const roomId = searchParams.get("roomid");
       socket.emit("join room", roomId, (err, members) => {
@@ -31,16 +32,14 @@ export default function Home() {
         }
         setRoom(roomId);
         setRoomState(roomId);
-        console.log(members);
-        !isUnmounted && canvasRef.current.socketOn();
+        isMounted && canvasRef.current.socketOn();
       });
     }
     window.addEventListener("beforeunload", handleBeforeUnload);
 
     return () => {
-      isUnmounted = true;
-      setRoom("");
-      canvasRef.current && canvasRef.current.socketOff();
+      isMounted = false;
+      handleBeforeUnload(null);
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, []);
@@ -50,6 +49,7 @@ export default function Home() {
       <h1>{roomState}</h1>
       <hr />
       <Canvas ref={canvasRef} />
+      <Chatroom />
     </div>
   );
 }
