@@ -3,6 +3,7 @@ import { useSearchParams } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import Canvas from "@/Canvas";
 import Chatroom from "@/Chatroom";
+import RoomMembers from "@/RoomMembers";
 import { setRoom, socket } from "@/socket";
 
 export default function Home() {
@@ -49,6 +50,7 @@ export default function Home() {
       <h1>{roomState}</h1>
       <hr />
       <Canvas ref={canvasRef} />
+      <RoomMembers />
       <Chatroom />
     </div>
   );

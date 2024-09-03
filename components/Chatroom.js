@@ -4,7 +4,7 @@ import { getRoom, socket } from "@/socket";
 export default function Chatroom() {
   const [messages, setMessages] = useState([]);
   const [formData, setFormData] = useState({
-    input: "",
+    message: "",
   });
 
   useEffect(() => {
@@ -30,8 +30,10 @@ export default function Chatroom() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    socket.emit("chat message", formData.input, getRoom(), () => {
-      setFormData((prevFormData) => ({ ...prevFormData, input: "" }));
+    const message = formData.message;
+    socket.emit("chat message", formData.message, getRoom(), () => {
+      setFormData((prevFormData) => ({ ...prevFormData, message: "" }));
+      setMessages((prevMessages) => [...prevMessages, message]);
     });
   };
 
@@ -40,9 +42,9 @@ export default function Chatroom() {
       <hr />
       <form onSubmit={handleSubmit}>
         <input
-          name="input"
+          name="message"
           autoComplete="off"
-          value={formData.input}
+          value={formData.message}
           onChange={handleChange}
         />
         <button>Send messages</button>

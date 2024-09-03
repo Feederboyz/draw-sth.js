@@ -65,7 +65,8 @@ app.prepare().then(() => {
         roomOfSocket[socket.id] = room;
         rooms[room]["members"].add(socket.id);
         // Provide array instead of Set
-        // socket.to(room).emit("update members", [...rooms[room]["members"]]);
+        io.to(room).emit("update members", [...rooms[room]["members"]]);
+        console.log([...rooms[room]["members"]]);
         cb(null, "");
       } else {
         cb(new Error("Room is full"));
