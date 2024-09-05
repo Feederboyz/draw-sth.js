@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { getRoom, socket } from "@/socket";
+import RoomMembers from "@/RoomMembers";
+import styles from "./Chatroom.module.css";
 
 export default function Chatroom() {
   const [messages, setMessages] = useState([]);
@@ -33,28 +35,33 @@ export default function Chatroom() {
     const message = formData.message;
     socket.emit("chat message", formData.message, getRoom(), () => {
       setFormData((prevFormData) => ({ ...prevFormData, message: "" }));
-      setMessages((prevMessages) => [...prevMessages, message]);
     });
   };
 
   return (
-    <>
-      <hr />
-      <form onSubmit={handleSubmit}>
-        <input
-          name="message"
-          autoComplete="off"
-          value={formData.message}
-          onChange={handleChange}
-        />
-        <button>Send messages</button>
-      </form>
-      <hr />
-      <ul>
-        {messages.map((message, index) => (
-          <li key={index}>{message}</li>
-        ))}
-      </ul>
-    </>
+    <div id={styles.wrapper}>
+      <div>
+        <RoomMembers />
+      </div>
+      <div>
+        <div id={styles.messages}>
+          <ul>
+            {messages.map((message, index) => (
+              <li key={index}>{message}</li>
+            ))}
+          </ul>
+        </div>
+        <form id={styles.form} onSubmit={handleSubmit}>
+          <input
+            id={styles.messageInput}
+            name="message"
+            autoComplete="off"
+            value={formData.message}
+            onChange={handleChange}
+          />
+          <button className={styles.button}>Send messages</button>
+        </form>
+      </div>
+    </div>
   );
 }

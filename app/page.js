@@ -1,7 +1,6 @@
 "use client";
 
-// import styles from "./page.module.css";
-// import Chatroom from "@/Chatroom";
+import styles from "./page.module.css";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -29,26 +28,51 @@ export default function Home() {
 
   const handleCreateRoom = () => {
     const roomId = generateRoomId();
-    router.push(`room?roomid=${roomId}`);
+    router.push(`room?roomid=${roomId}&name=${formData.name}`);
   };
 
   const handleEnterRoom = (event) => {
     event.preventDefault();
-    router.push(`room?roomid=${formData.room}`);
+    router.push(`room?roomid=${formData.room}&name=${formData.name}`);
   };
   return (
-    <>
-      <button onClick={handleCreateRoom}>Create room</button>
-      <form onSubmit={handleEnterRoom}>
-        <input
-          name="room"
-          autoComplete="off"
-          type="string"
-          value={formData.room}
-          onChange={handleChange}
-        />
-        <button>Enter room</button>
+    <div id={styles.wrapper}>
+      <div id={styles.userWrapper}>
+        <h1> Hello world</h1>
+      </div>
+      <form id="formId" onSubmit={handleEnterRoom}>
+        <div className={styles.formContent}>
+          <label for="room">Name:</label>
+          <input
+            className={styles.input}
+            name="name"
+            id="name"
+            type="string"
+            value={formData.name}
+            onChange={handleChange}
+          />
+        </div>
+        <div className={styles.formContent}>
+          <label for="room"> Room number:</label>
+          <input
+            className={styles.input}
+            name="room"
+            id="room"
+            autoComplete="off"
+            type="string"
+            value={formData.room}
+            onChange={handleChange}
+          />
+        </div>
       </form>
-    </>
+      <div id={styles.buttonWrapper}>
+        <button className={styles.button} onClick={handleCreateRoom}>
+          Create room
+        </button>
+        <button form="formId" className={styles.button}>
+          Enter room
+        </button>
+      </div>
+    </div>
   );
 }

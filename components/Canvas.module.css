@@ -1,0 +1,53 @@
+#wrapper {
+  display: flex;
+  flex-direction: row;
+  height: var(--canvasHeight);
+}
+
+#toolbar {
+  background-color: rgb(216, 177, 177);
+  border-right: 2px solid black;
+  width: var(--toolbarWidth);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#colorPalette {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.colorButton {
+  width: 25px;
+  height: 25px;
+  margin: 3px;
+  border: none;
+  cursor: pointer;
+}
+
+.button {
+  width: 25px;
+  height: 25px;
+  margin: 3px;
+  border: none;
+  cursor: pointer;
+}
+
+.brushButton {
+  width: 15px;
+  height: 25px;
+  margin: 3px;
+  border: none;
+  cursor: pointer;
+}
+
+#funcController {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+#brushController {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}

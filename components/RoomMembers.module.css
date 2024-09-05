@@ -1,0 +1,5 @@
+#wrapper {
+  border: 1px solid black;
+  width: var(--roomMemberWidth);
+  height: var(--roomMemberHeight);
+}

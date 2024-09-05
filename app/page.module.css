@@ -1,0 +1,45 @@
+#wrapper {
+  background-color: var(--wrapperBgColor);
+  border-radius: 20px;
+  width: 600px;
+  height: 700px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#userWrapper {
+  margin: 100px 0px 50px;
+  background-color: aquamarine;
+  width: 300px;
+  height: 300px;
+  border-radius: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#buttonWrapper {
+  margin: 10px 0px;
+}
+
+.formContent {
+  width: 500px;
+  margin: 20px 0px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.input {
+  width: 350px;
+}
+
+.button {
+  margin: 0px 10px;
+  border-radius: 5px;
+  border: 1px solid black;
+  width: 230px;
+  height: 30px;
+}
