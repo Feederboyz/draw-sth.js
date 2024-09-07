@@ -5,6 +5,10 @@ export default class RoomDb {
     this.roomOfSocket = {};
   }
 
+  debug() {
+    console.log(this.rooms);
+  }
+
   joinRoom(room, name, socketId) {
     // Create room
     if (!this.rooms[room]) {
@@ -27,6 +31,10 @@ export default class RoomDb {
   leaveRoom(socketId) {
     const room = this.roomOfSocket[socketId];
     delete this.rooms[room]?.["members"]?.[socketId];
+    // Delete room if no members
+    if (Object.keys(this.rooms[room].members).length === 0) {
+      delete this.rooms[room];
+    }
     delete this.roomOfSocket?.[socketId];
   }
 
