@@ -23,6 +23,7 @@ app.prepare().then(() => {
       console.log(socket.id, event, args);
     });
 
+    // Chat
     socket.on("chat message", (message, room, cb) => {
       const name = rooms[room]["members"][socket.id].name;
       message = `${name}: ${message}`;
@@ -30,6 +31,55 @@ app.prepare().then(() => {
       cb();
     });
 
+    // Connection
+    socket.on("join room", (room, name, cb) => {
+      socket.join(room);
+      if (!rooms[room]) {
+        rooms[room] = {};
+        rooms[room]["host"] = socket.id;
+        rooms[room]["state"] = "init";
+        rooms[room]["members"] = {};
+      }
+
+      if (Object.keys(rooms[room]["members"]).length < MAXIMUM_ROOM_MEMBERS) {
+        roomOfSocket[socket.id] = room;
+        rooms[room]["members"][socket.id] = { name };
+        io.to(room).emit("update members", rooms[room]["members"]);
+        let obj = { isHost: rooms[room]["host"] === socket.id };
+        cb(null, obj);
+      } else {
+        cb(new Error("Room is full"));
+      }
+    });
+
+    function leaveRoom(socket) {
+      const room = roomOfSocket[socket.id];
+      delete rooms[room]?.["members"]?.[socket.id];
+      delete roomOfSocket?.[socket.id];
+      socket.leave(room);
+      console.log(rooms);
+      io.to(room).emit("update members", rooms[room]["members"]);
+    }
+    socket.on("leave room", (cb) => {
+      leaveRoom(socket);
+      cb(null, "");
+    });
+
+    socket.on("disconnect", () => {
+      leaveRoom(socket);
+    });
+
+    // Game
+    socket.on("start game", (room, cb) => {
+      console.log(rooms[room]["state"]);
+      if (rooms[room]["state"] === "init") {
+        rooms[room]["state"] = "started";
+        io.to(room).emit("start game");
+        cb();
+      }
+    });
+
+    // Canvas
     socket.on("draw points", (points, brushColor, brushRadius, room) => {
       socket.broadcast
         .to(room)
@@ -48,40 +98,6 @@ app.prepare().then(() => {
 
     socket.on("erase all", (room) => {
       socket.broadcast.to(room).emit("erase all");
-    });
-
-    socket.on("join room", (room, name, cb) => {
-      socket.join(room);
-      if (!rooms[room]) {
-        rooms[room] = {};
-        rooms[room]["host"] = socket.id;
-        rooms[room]["state"] = "init";
-        rooms[room]["members"] = {};
-      }
-
-      if (Object.keys(rooms[room]["members"]).length < MAXIMUM_ROOM_MEMBERS) {
-        roomOfSocket[socket.id] = room;
-        rooms[room]["members"][socket.id] = { name };
-        io.to(room).emit("update members", rooms[room]["members"]);
-        cb(null, "");
-      } else {
-        cb(new Error("Room is full"));
-      }
-    });
-
-    socket.on("leave room", (cb) => {
-      const room = roomOfSocket[socket.id];
-      delete rooms[room]?.["members"]?.[socket.id];
-      delete roomOfSocket?.[socket.id];
-      socket.leave(room);
-      cb(null, "");
-    });
-
-    socket.on("disconnect", () => {
-      const room = roomOfSocket[socket.id];
-      delete rooms[room]?.["members"]?.[socket.id];
-      delete roomOfSocket?.[socket.id];
-      socket.leave(room);
     });
   });
 
