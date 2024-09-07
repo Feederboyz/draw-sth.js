@@ -1,6 +1,7 @@
 import { createServer } from "node:http";
 import next from "next";
 import { Server } from "socket.io";
+import RoomDb from "./RoomDb.js";
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
@@ -9,9 +10,7 @@ const port = 3000;
 const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
 
-var rooms = {};
-var roomOfSocket = {};
-const MAXIMUM_ROOM_MEMBERS = 10;
+var roomDb = new RoomDb();
 
 app.prepare().then(() => {
   const httpServer = createServer(handler);
@@ -25,7 +24,7 @@ app.prepare().then(() => {
 
     // Chat
     socket.on("chat message", (message, room, cb) => {
-      const name = rooms[room]["members"][socket.id].name;
+      const name = roomDb.getName(socket.id);
       message = `${name}: ${message}`;
       io.to(room).emit("chat message", message);
       cb();
@@ -34,18 +33,9 @@ app.prepare().then(() => {
     // Connection
     socket.on("join room", (room, name, cb) => {
       socket.join(room);
-      if (!rooms[room]) {
-        rooms[room] = {};
-        rooms[room]["host"] = socket.id;
-        rooms[room]["state"] = "init";
-        rooms[room]["members"] = {};
-      }
-
-      if (Object.keys(rooms[room]["members"]).length < MAXIMUM_ROOM_MEMBERS) {
-        roomOfSocket[socket.id] = room;
-        rooms[room]["members"][socket.id] = { name };
-        io.to(room).emit("update members", rooms[room]["members"]);
-        let obj = { isHost: rooms[room]["host"] === socket.id };
+      if (roomDb.joinRoom(room, name, socket.id)) {
+        io.to(room).emit("update members", roomDb.getMembers(room));
+        let obj = { isHost: roomDb.isHost(socket.id) };
         cb(null, obj);
       } else {
         cb(new Error("Room is full"));
@@ -53,13 +43,12 @@ app.prepare().then(() => {
     });
 
     function leaveRoom(socket) {
-      const room = roomOfSocket[socket.id];
-      delete rooms[room]?.["members"]?.[socket.id];
-      delete roomOfSocket?.[socket.id];
+      roomDb.leaveRoom(socket.id);
+      const room = roomDb.getRoomOfSocket(socket.id);
       socket.leave(room);
-      console.log(rooms);
-      io.to(room).emit("update members", rooms[room]["members"]);
+      io.to(room).emit("update members", roomDb.getMembers(room));
     }
+
     socket.on("leave room", (cb) => {
       leaveRoom(socket);
       cb(null, "");
@@ -71,9 +60,8 @@ app.prepare().then(() => {
 
     // Game
     socket.on("start game", (room, cb) => {
-      console.log(rooms[room]["state"]);
-      if (rooms[room]["state"] === "init") {
-        rooms[room]["state"] = "started";
+      if (roomDb.isState(room, "init")) {
+        roomDb.setState(room, "started");
         io.to(room).emit("start game");
         cb();
       }

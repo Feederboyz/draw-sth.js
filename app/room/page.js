@@ -52,6 +52,8 @@ export default function Home() {
         setRoom(roomId);
         if (isHost) {
           setRoomState("host");
+        } else {
+          setRoomState("guest");
         }
         isMounted && canvasRef.current.socketOn();
         socketOn();
