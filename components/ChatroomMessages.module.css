@@ -1,0 +1,7 @@
+#messages {
+  border: 1px solid black;
+  overflow-y: auto;
+  padding: 10px;
+  height: var(--messagesHeight);
+  width: var(--messagesWidth);
+}

@@ -1,29 +1,14 @@
-import { useRef, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { getRoom, socket } from "@/socket";
 import RoomMembers from "@/RoomMembers";
+import ChatroomMessages from "@/ChatroomMessages";
 import styles from "./Chatroom.module.css";
 
 export default function Chatroom() {
-  const messagesRef = useRef(null);
   const [messages, setMessages] = useState([]);
   const [formData, setFormData] = useState({
     message: "",
   });
-
-  function isAtBottom() {
-    const ref = messagesRef.current;
-    return ref.scrollHeight - ref.scrollTop - ref.clientHeight <= 30;
-  }
-
-  // scroll to bottom if user is already at the bottom
-  useEffect(() => {
-    if (messagesRef.current) {
-      const ref = messagesRef.current;
-      if (isAtBottom()) {
-        ref.scrollTop = ref.scrollHeight;
-      }
-    }
-  }, [messages]);
 
   useEffect(() => {
     const handleBeforeUnload = (event) => {
@@ -48,7 +33,6 @@ export default function Chatroom() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const message = formData.message;
     socket.emit("chat message", formData.message, getRoom(), () => {
       setFormData((prevFormData) => ({ ...prevFormData, message: "" }));
     });
@@ -56,17 +40,9 @@ export default function Chatroom() {
 
   return (
     <div id={styles.wrapper}>
+      <RoomMembers />
       <div>
-        <RoomMembers />
-      </div>
-      <div>
-        <div ref={messagesRef} id={styles.messages}>
-          <ul>
-            {messages.map((message, index) => (
-              <li key={index}>{message}</li>
-            ))}
-          </ul>
-        </div>
+        <ChatroomMessages messages={messages} />
         <form id={styles.form} onSubmit={handleSubmit}>
           <input
             id={styles.messageInput}
