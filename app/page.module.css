@@ -40,6 +40,120 @@
   margin: 0px 10px;
   border-radius: 5px;
   border: 1px solid black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 230px;
   height: 30px;
+}
+
+/* Updated styles for room layout */
+.roomContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.roomContent {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.canvasWrapper {
+  position: relative;
+  flex: 1;
+}
+
+.sidebarWrapper {
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #ccc; /* Optional: adds a separator between Chatroom and Canvas */
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 600px;
+}
+
+.title {
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.label {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 5px;
+}
+
+.input {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.3s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.button {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.1s;
+}
+
+.button:active {
+  transform: scale(0.98);
+}
+
+.createButton {
+  background-color: #667eea;
+  color: white;
+}
+
+.createButton:hover {
+  background-color: #5a6fd6;
+}
+
+.enterButton {
+  background-color: #764ba2;
+  color: white;
+}
+
+.enterButton:hover {
+  background-color: #6a4292;
 }

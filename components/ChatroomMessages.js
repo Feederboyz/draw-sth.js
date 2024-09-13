@@ -5,7 +5,8 @@ export default function ChatroomMessages({ messages }) {
 
   function isAtBottom() {
     const ref = messagesRef.current;
-    return ref.scrollHeight - ref.scrollTop - ref.clientHeight <= 30;
+    console.log(ref.scrollHeight - ref.scrollTop - ref.clientHeight);
+    return ref.scrollHeight - ref.scrollTop - ref.clientHeight <= 40;
   }
 
   // scroll to bottom if user is already at the bottom

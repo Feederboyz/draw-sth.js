@@ -50,8 +50,9 @@ export default function Chatroom() {
             autoComplete="off"
             value={formData.message}
             onChange={handleChange}
+            placeholder="Type your message..."
           />
-          <button className={styles.button}>Send messages</button>
+          <button className={styles.button}>Send</button>
         </form>
       </div>
     </div>

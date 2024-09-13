@@ -3,12 +3,11 @@ import { socket } from "@/socket";
 import styles from "./RoomMembers.module.css";
 
 export default function RoomMembers() {
-  const [names, setNames] = useState([]);
+  const [membersData, setMembersData] = useState([]);
 
   useEffect(() => {
     socket.on("update members", (members) => {
-      const names = Object.values(members).map((member) => member.name);
-      setNames(names);
+      setMembersData(Object.values(members));
     });
 
     return () => {
@@ -16,13 +15,26 @@ export default function RoomMembers() {
     };
   }, []);
 
+  const renderMemberSlots = () => {
+    const slots = new Array(6).fill(null);
+    return slots.map((_, index) => {
+      const member = membersData[index];
+      return (
+        <li
+          key={index}
+          className={`${styles.memberItem} ${!member ? styles.emptySlot : ""}`}
+        >
+          {member
+            ? `${member.name}: ${Math.floor(member.score)}`
+            : "Waiting..."}
+        </li>
+      );
+    });
+  };
+
   return (
-    <div id={styles.wrapper}>
-      <ul>
-        {names.map((member, index) => (
-          <li key={index}>{member}</li>
-        ))}
-      </ul>
+    <div className={styles.wrapper}>
+      <ul className={styles.memberList}>{renderMemberSlots()}</ul>
     </div>
   );
 }

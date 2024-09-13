@@ -2,17 +2,13 @@ import CanvasDraw from "@/CanvasDraw/index";
 import { forwardRef, useImperativeHandle } from "react";
 import { useRef, useState } from "react";
 import styles from "./Canvas.module.css";
+import StatusBar from "@/StatusBar";
 
 export default forwardRef((props, ref) => {
   const canvasDrawRef = useRef(null);
+  const statusBarRef = useRef(null);
   const [brushColor, setBrushColor] = useState("#444");
   const [brushRadius, setBrushRadius] = useState(8);
-
-  // const root = document.documentElement;
-  // const canvasWidth = getComputedStyle(root).getPropertyValue("--canvasWidth");
-  // const canvasHeight =
-  //   getComputedStyle(root).getPropertyValue("--canvasHeight");
-  // console.log(canvasWidth, canvasHeight);
 
   useImperativeHandle(ref, () => ({
     saveLine: ({ points, brushColor, brushRadius }, triggerEmit) => {
@@ -32,12 +28,17 @@ export default forwardRef((props, ref) => {
     },
     socketOn: () => {
       canvasDrawRef.current.socketOn();
+      statusBarRef.current && statusBarRef.current.socketOn();
     },
     socketOff: () => {
       canvasDrawRef.current.socketOff();
+      statusBarRef.current && statusBarRef.current.socketOff();
     },
     eraseAll: () => {
       canvasDrawRef.current.eraseAll();
+    },
+    clear: () => {
+      canvasDrawRef.current.clear();
     },
   }));
 
@@ -76,50 +77,55 @@ export default forwardRef((props, ref) => {
 
   return (
     <div id={styles.wrapper}>
-      <div id={styles.toolbar}>
-        <div id={styles.colorPalette}>
-          {colorList.map(({ color, handler }) => (
-            <button
-              key={color}
-              className={styles.colorButton}
-              style={{
-                backgroundColor: color,
-              }}
-              onClick={handler}
-            />
-          ))}
-        </div>
-        <div id={styles.funcController}>
-          <button className={styles.button} onClick={handleUndo}>
-            U
-          </button>
-          <button className={styles.button} onClick={handleClear}>
-            C
-          </button>
-        </div>
-        <div id={styles.brushController}>
-          {brushRadiusList.map((brushRadius) => (
-            <button
-              className={styles.brushButton}
-              key={brushRadius}
-              onClick={handleBrushRadius}
-              value={brushRadius}
-            >
-              {brushRadius}
+      <StatusBar ref={statusBarRef} />
+      <div className={styles.flexRow}>
+        <div id={styles.toolbar}>
+          <div id={styles.colorPalette}>
+            {colorList.map(({ color, handler }) => (
+              <button
+                key={color}
+                className={styles.colorButton}
+                style={{
+                  backgroundColor: color,
+                }}
+                onClick={handler}
+              />
+            ))}
+          </div>
+          <div id={styles.funcController}>
+            <button className={styles.button} onClick={handleUndo}>
+              ↺
             </button>
-          ))}
+            <button className={styles.button} onClick={handleClear}>
+              🗑️
+            </button>
+          </div>
+          <div id={styles.brushController}>
+            {brushRadiusList.map((brushRadius) => (
+              <button
+                className={styles.brushButton}
+                key={brushRadius}
+                onClick={(e) => {
+                  handleBrushRadius(e);
+                }}
+                value={brushRadius}
+              >
+                {brushRadius} px
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      <CanvasDraw
-        hideGrid={true}
-        lazyRadius={2}
-        canvasWidth={600}
-        canvasHeight={600}
-        brushRadius={brushRadius}
-        brushColor={brushColor}
-        ref={canvasDrawRef}
-      />
+        <CanvasDraw
+          hideGrid={true}
+          lazyRadius={2}
+          canvasWidth={600}
+          canvasHeight={600}
+          brushRadius={brushRadius}
+          brushColor={brushColor}
+          ref={canvasDrawRef}
+        />
+      </div>
     </div>
   );
 });

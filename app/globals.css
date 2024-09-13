@@ -3,16 +3,19 @@
   --toolbarWidth: 110px;
   --canvasHeight: 600px;
 
-  /* chat room */
-  --chatRoomWidth: 510px;
-  --chatRoomHeight: 200px;
-
+  --chatRoomWidth: 400px;
   /*  room member */
-  --roomMemberWidth: 200px;
-  --roomMemberHeight: var(--chatRoomHeight);
+  --roomMemberWidth: var(--chatRoomWidth);
+  --roomMemberHeight: 370px;
 
+  /* messages */
+  --messagesMargin: 15px 0px;
   --messagesWidth: var(--chatRoomWidth);
-  --messagesHeight: 160px;
+  --messagesHeight: 200px;
+
+  /* form */
+  --formWidth: var(--chatRoomWidth);
+  --formHeight: 50px;
 }
 
 * {
@@ -22,10 +25,7 @@
 }
 
 body {
-  /* background-image: url("backgound.jpg");
-  background-position: center;
-  background-repeat: no-repeat; */
-  background-color: pink;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   justify-content: center;
   align-items: center;

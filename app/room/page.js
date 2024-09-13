@@ -5,64 +5,157 @@ import Canvas from "@/Canvas";
 import Chatroom from "@/Chatroom";
 import Overlay from "@/Overlay";
 import { getRoom, setRoom, socket } from "@/socket";
+import styles from "./page.module.css";
 
 export default function Home() {
   const searchParams = useSearchParams();
   const canvasRef = useRef(null);
   const wrapperRef = useRef(null);
-  const [roomState, setRoomState] = useState("");
+
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-  const [state, setState] = useState("guest");
+  const [loading, setLoading] = useState(true);
+
+  const [roomState, setRoomState] = useState("guest");
+  const [questions, setQuestions] = useState([]);
+  const [prepareRoundMessage, setPrepareRoundMessage] = useState("");
+
+  const handleBeforeUnload = (event) => {
+    // Attempt to leave the room
+    socketOff();
+    canvasRef.current && canvasRef.current.socketOff();
+    socket.emit("leave room");
+  };
 
   function socketOn() {
+    socket.onAny((event, ...args) => {
+      console.log(event, args);
+    });
+
     socket.on("start game", () => {
-      if (state === "guest" && roomState === "host") {
-        setState("started");
-        console.log("Game started");
-      }
+      setRoomState((prevState) => {
+        if (prevState !== "guest" && prevState !== "host") {
+          console.warn(`Unexpected room state for start game: ${prevState}`);
+        }
+        return "started";
+      });
+    });
+
+    socket.on("choose question", (questions) => {
+      setRoomState((prevState) => {
+        if (
+          prevState !== "host" &&
+          prevState !== "guest" &&
+          prevState !== "round ended"
+        ) {
+          console.warn(
+            `Unexpected room state for choose question: ${prevState}`
+          );
+        }
+        canvasRef.current.clear();
+        return "choosing";
+      });
+      setQuestions(questions);
+    });
+
+    socket.on("wait question", () => {
+      setRoomState((prevState) => {
+        if (
+          prevState !== "host" &&
+          prevState !== "guest" &&
+          prevState !== "round ended"
+        ) {
+          console.warn(`Unexpected room state for wait question: ${prevState}`);
+        }
+        canvasRef.current.clear();
+        return "waiting";
+      });
+    });
+
+    socket.on("start guessing", () => {
+      setRoomState((prevState) => {
+        if (prevState !== "waiting") {
+          console.warn(
+            `Unexpected room state for start guessing: ${prevState}`
+          );
+        }
+        return "guessing";
+      });
+    });
+
+    socket.on("start drawing", () => {
+      setRoomState((prevState) => {
+        if (prevState !== "choosing") {
+          console.warn(`Unexpected room state for start drawing: ${prevState}`);
+        }
+        return "drawing";
+      });
+    });
+
+    socket.on("prepare round", ({ message }) => {
+      setRoomState("preparing");
+      setPrepareRoundMessage(message);
+    });
+
+    socket.on("round ended", ({ correctAnswer }) => {
+      setRoomState("round ended");
+    });
+
+    socket.on("game ended", () => {
+      setRoomState("ended");
     });
   }
 
   function socketOff() {
+    socket.offAny();
     socket.off("start game");
+    socket.off("choose question");
+    socket.off("wait question");
+    socket.off("start guessing");
+    socket.off("start drawing");
+    socket.off("player left");
+    socket.off("game ended");
   }
 
-  useEffect(() => {
-    const handleBeforeUnload = (event) => {
-      socket.emit("leave room", (err, res) => {
-        if (err) {
-          console.error(err);
-        }
-        canvasRef.current && canvasRef.current.socketOff();
-        socketOff();
-        setRoom("");
-        setRoomState("");
-      });
-    };
+  const handleQuestionChosen = (question) => {
+    socket.emit("question chosen", question, (error) => {
+      if (error) {
+        console.error("Error choosing question:", error);
+      }
+    });
+  };
 
-    let isMounted = true;
+  useEffect(() => {
+    let isUnMounted = false;
     if (canvasRef.current) {
       const roomId = searchParams.get("roomid");
       const name = searchParams.get("name");
-      socket.emit("join room", roomId, name, (err, { isHost }) => {
+      socket.emit("join room", roomId, name, (err, response) => {
         if (err) {
           console.error(err);
           return;
         }
-        setRoom(roomId);
-        if (isHost) {
-          setRoomState("host");
-        } else {
-          setRoomState("guest");
+        // If the component is unmounted, don't call any further state updates
+        const { isHost, gameEnded, gameInProgress } = response;
+        if (!isUnMounted) {
+          setRoom(roomId);
+          if (gameEnded) {
+            setRoomState("ended");
+          } else if (gameInProgress) {
+            setRoomState("spectating");
+          } else if (isHost) {
+            setRoomState("host");
+          } else {
+            setRoomState("guest");
+          }
+          canvasRef.current.socketOn();
+          socketOn();
         }
-        isMounted && canvasRef.current.socketOn();
-        socketOn();
       });
     }
     window.addEventListener("beforeunload", handleBeforeUnload);
 
     return () => {
-      isMounted = false;
+      isUnMounted = true;
       handleBeforeUnload(null);
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
@@ -72,6 +165,7 @@ export default function Home() {
     if (wrapperRef.current) {
       const { width, height } = wrapperRef.current.getBoundingClientRect();
       setDimensions({ width, height });
+      setLoading(false);
     }
   }, []);
 
@@ -84,17 +178,44 @@ export default function Home() {
   }
 
   return (
-    <div>
-      <h1>{roomState}</h1>
-      <div ref={wrapperRef} style={{ position: "relative" }}>
-        <Canvas ref={canvasRef} />
-        {(state === "guest" || state === "host") && (
-          <Overlay width={dimensions.width} height={dimensions.height}>
-            {state === "host" && <button onClick={handleStart}>Start</button>}
-          </Overlay>
-        )}
+    <div className={styles.roomContainer}>
+      <h1 className={styles.roomHeader}>Room number: {getRoom()}</h1>
+      <div className={styles.roomContent}>
+        <Chatroom />
+        <div ref={wrapperRef} className={styles.canvasWrapper}>
+          <Canvas ref={canvasRef} />
+          {roomState !== "drawing" && roomState !== "guessing" && !loading && (
+            <Overlay width={dimensions.width} height={dimensions.height}>
+              {roomState === "host" && (
+                <button className={styles.button} onClick={handleStart}>
+                  Start
+                </button>
+              )}
+              {roomState === "choosing" && (
+                <>
+                  <h2>Choose a word to draw:</h2>
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    {questions.map((question, index) => (
+                      <button
+                        key={index}
+                        className={styles.button}
+                        onClick={() => handleQuestionChosen(question)}
+                      >
+                        {question}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+              {roomState === "guest" && <h1>Waiting for host to start</h1>}
+              {roomState === "waiting" && <h1>Choosing question ...</h1>}
+              {roomState === "ended" && <h1>Game Over</h1>}
+              {roomState === "spectating" && <h1>Spectating</h1>}
+              {roomState === "preparing" && <h1>{prepareRoundMessage}</h1>}
+            </Overlay>
+          )}
+        </div>
       </div>
-      <Chatroom />
     </div>
   );
 }
