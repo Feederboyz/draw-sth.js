@@ -79,6 +79,7 @@ app.prepare().then(() => {
       console.log(roomDb.getCurrentQuestion(room));
       if (
         roomDb.isState(room, "started") &&
+        !roomDb.isDrawing(room, socket.id) &&
         message.toLowerCase() === roomDb.getCurrentQuestion(room).toLowerCase()
       ) {
         // if guessing right

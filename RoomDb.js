@@ -1,8 +1,8 @@
 export default class RoomDb {
   constructor() {
     this.rooms = {};
-    this.MAXIMUM_ROOM_MEMBERS = 4;
-    this.GAME_ROUNDS = 1;
+    this.MAXIMUM_ROOM_MEMBERS = 6;
+    this.GAME_ROUNDS = 2;
     this.roomOfSocket = {};
   }
 
@@ -98,11 +98,6 @@ export default class RoomDb {
     return;
   }
 
-  // TODO
-  removePlayerFromGame(room, playerId) {
-    return;
-  }
-
   getRound(room) {
     return this.rooms[room].gameStatus.round;
   }
@@ -178,5 +173,9 @@ export default class RoomDb {
 
   getRoundTimer(room) {
     return this.rooms[room].roundData.timerId;
+  }
+
+  isDrawing(room, socketId) {
+    return this.getCurrentDrawer(room) === socketId;
   }
 }

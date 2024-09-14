@@ -117,6 +117,7 @@ const Canvas = forwardRef((props, ref) => {
         </div>
 
         <CanvasDraw
+          disabled={props.disabled}
           hideGrid={true}
           lazyRadius={2}
           canvasWidth={600}

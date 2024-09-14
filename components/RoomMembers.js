@@ -7,7 +7,7 @@ export default function RoomMembers() {
 
   useEffect(() => {
     socket.on("update members", (members) => {
-      setMembersData(Object.values(members));
+      setMembersData(Object.values(members).sort((a, b) => b.score - a.score));
     });
 
     return () => {

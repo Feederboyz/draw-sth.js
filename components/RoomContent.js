@@ -185,7 +185,7 @@ export default function Home() {
       <div className={styles.roomContent}>
         <Chatroom />
         <div ref={wrapperRef} className={styles.canvasWrapper}>
-          <Canvas ref={canvasRef} />
+          <Canvas ref={canvasRef} disabled={roomState !== "drawing"} />
           {roomState !== "drawing" && roomState !== "guessing" && !loading && (
             <Overlay width={dimensions.width} height={dimensions.height}>
               {roomState === "host" && (
