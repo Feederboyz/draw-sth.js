@@ -3,7 +3,6 @@ import { socket } from "@/socket";
 
 const StatusBar = forwardRef((props, ref) => {
   const [remainingTime, setRemainingTime] = useState(null);
-  const [gameStatus, setGameStatus] = useState("Waiting");
 
   const socketOn = () => {
     socket.on("time update", (time) => {
@@ -11,27 +10,13 @@ const StatusBar = forwardRef((props, ref) => {
     });
 
     socket.on("round ended", ({ result }) => {
-      setGameStatus(result === "win" ? "You Win!" : "You Lose!");
       setRemainingTime(null);
-    });
-
-    socket.on("start guessing", () => {
-      setGameStatus("Guessing");
-    });
-
-    socket.on("start drawing", () => {
-      setGameStatus("Drawing");
-    });
-    socket.on("correct guess", () => {
-      setGameStatus("Correct");
     });
   };
 
   const socketOff = () => {
     socket.off("time update");
     socket.off("round ended");
-    socket.off("start guessing");
-    socket.off("start drawing");
   };
 
   useImperativeHandle(ref, () => ({
@@ -68,5 +53,7 @@ const StatusBar = forwardRef((props, ref) => {
     </div>
   );
 });
+
+StatusBar.displayName = "StatusBar";
 
 export default StatusBar;
