@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import styles from "./Canvas.module.css";
 import StatusBar from "@/StatusBar";
 
-export default forwardRef((props, ref) => {
+const Canvas = forwardRef((props, ref) => {
   const canvasDrawRef = useRef(null);
   const statusBarRef = useRef(null);
   const [brushColor, setBrushColor] = useState("#444");
@@ -129,3 +129,7 @@ export default forwardRef((props, ref) => {
     </div>
   );
 });
+
+Canvas.displayName = "Canvas";
+
+export default Canvas;
