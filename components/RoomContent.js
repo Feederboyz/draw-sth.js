@@ -159,7 +159,7 @@ export default function Home() {
       handleBeforeUnload(null);
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-  });
+  }, []);
 
   useEffect(() => {
     if (wrapperRef.current) {
