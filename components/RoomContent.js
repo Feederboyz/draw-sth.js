@@ -14,6 +14,7 @@ export default function Home() {
 
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [loading, setLoading] = useState(true);
+  const [roomIdState, setRoomIdState] = useState("");
 
   const [roomState, setRoomState] = useState("guest");
   const [questions, setQuestions] = useState([]);
@@ -138,6 +139,7 @@ export default function Home() {
         const { isHost, gameEnded, gameInProgress } = response;
         if (!isUnMounted) {
           setRoom(roomId);
+          setRoomIdState(roomId);
           if (gameEnded) {
             setRoomState("ended");
           } else if (gameInProgress) {
@@ -179,7 +181,7 @@ export default function Home() {
 
   return (
     <div className={styles.roomContainer}>
-      <h1 className={styles.roomHeader}>Room number: {getRoom()}</h1>
+      <h1 className={styles.roomHeader}>Room number: {roomIdState}</h1>
       <div className={styles.roomContent}>
         <Chatroom />
         <div ref={wrapperRef} className={styles.canvasWrapper}>
